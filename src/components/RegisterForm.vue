@@ -1,16 +1,12 @@
 <template>
   <div
-    class="text-white text-center font-bold p-5 mb-4s"
+    class="text-white text-center font-bold p-4 mb-4"
     v-if="reg_show_alert"
     :class="reg_alert_variant"
   >
     {{ reg_alert_msg }}
   </div>
-  <vee-form
-    :validation-schema="schema"
-    @submit="register"
-    :initial-values="userData"
-  >
+  <vee-form :validation-schema="schema" @submit="register" :initial-values="userData">
     <div class="mb-3">
       <label class="inline-block mb-2">Name</label>
       <vee-field
@@ -101,9 +97,7 @@
           {{ error }}
         </div>
       </vee-field>
-      <ErrorMessage class="text-red-600" name="password" />
     </div>
-
     <div class="mb-3">
       <label class="inline-block mb-2">Confirm Password</label>
       <vee-field
@@ -126,7 +120,6 @@
       />
       <ErrorMessage class="text-red-600" name="confirm_password" />
     </div>
-
     <div class="mb-3">
       <label class="inline-block mb-2">Country</label>
       <vee-field
@@ -153,7 +146,6 @@
       </vee-field>
       <ErrorMessage class="text-red-600" name="country" />
     </div>
-
     <div class="mb-3 pl-6">
       <vee-field
         type="checkbox"
@@ -208,15 +200,24 @@ export default {
     };
   },
   methods: {
-    register(values) {
+    async register(values) {
       this.reg_show_alert = true;
       this.reg_in_submission = true;
       this.reg_alert_variant = 'bg-blue-500';
       this.reg_alert_msg = 'Please wait! Your account is being created.';
 
+      try {
+        await this.$store.dispatch('register', values);
+      } catch (error) {
+        this.reg_in_submission = false;
+        this.reg_alert_variant = 'bg-red-500';
+        this.reg_alert_msg = 'An unexpected error occured. Please try again later.';
+        return;
+      }
+
       this.reg_alert_variant = 'bg-green-500';
       this.reg_alert_msg = 'Success! Your account has been created.';
-      console.log(values);
+      window.location.reload();
     },
   },
 };
