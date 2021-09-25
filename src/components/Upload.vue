@@ -28,27 +28,21 @@
         @dragover.prevent.stop="isDragover = true"
         @dragenter.prevent.stop="isDragover = true"
         @dragleve.prevent.stop="isDragover = false"
-        @drop.prevent.stop="upload"
+        @drop.prevent.stop="upload($event)"
       >
         <h5>Drop your files here</h5>
       </div>
       <hr class="my-6" />
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div class="transition-all progress-bar bg-blue-400" style="width: 75%"></div>
+      <div class="mb-4" v-for="upload in uploads" :key="upload.name">
+        <div class="font-bold text-sm" :class="upload.textClass">
+          <i :class="upload.icon"></i> {{ upload.name }}
         </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div class="transition-all progress-bar bg-blue-400" style="width: 35%"></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div class="transition-all progress-bar bg-blue-400" style="width: 55%"></div>
+          <div
+            class="transition-all progress-bar"
+            :class="upload.variant"
+            :style="{ width: upload.currentProgress + '%' }"
+          ></div>
         </div>
       </div>
     </div>
@@ -56,16 +50,59 @@
 </template>
 
 <script>
+import { ref, uploadBytesResumable } from 'firebase/storage';
+import { storage } from '@/includes/firebase';
+
 export default {
   name: 'Upload',
   data() {
     return {
       isDragover: false,
+      uploads: [],
     };
   },
   methods: {
-    upload() {
+    upload($event) {
       this.isDragover = false;
+
+      const files = [...$event.dataTransfer.files];
+
+      files.forEach((file) => {
+        if (file.type !== 'audio/mpeg') {
+          return;
+        }
+        const songsRef = ref(storage, `songs/${file.name}`);
+        const task = uploadBytesResumable(songsRef, file);
+
+        // prettier-ignore
+        const uploadIndex = this.uploads.push({
+          task,
+          currentProgress: 0,
+          name: file.name,
+          variant: 'bg-blue-400',
+          icon: 'fas fa-spinner fa-spin',
+          textClass: '',
+        }) - 1;
+
+        task.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            this.uploads[uploadIndex].currentProgress = progress;
+          },
+          (error) => {
+            this.uploads[uploadIndex].variant = 'bg-red-400';
+            this.uploads[uploadIndex].icon = 'fas fa-times';
+            this.uploads[uploadIndex].textClass = 'text-red-400';
+            console.log(error);
+          },
+          () => {
+            this.uploads[uploadIndex].variant = 'bg-green-400';
+            this.uploads[uploadIndex].icon = 'fas fa-check';
+            this.uploads[uploadIndex].textClass = 'text-green-400';
+          },
+        );
+      });
     },
   },
 };
