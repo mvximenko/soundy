@@ -21,27 +21,27 @@
           hover:bg-green-400
           hover:border-green-400 hover:border-solid
         "
-        :class="{ 'bg-green-400 border-green-400 border-solid': isDragover }"
+        :class="{ 'bg-green-400 border-green-400 border-solid': is_dragover }"
         @drag.prevent.stop=""
         @dragstart.prevent.stop=""
-        @dragend.prevent.stop="isDragover = false"
-        @dragover.prevent.stop="isDragover = true"
-        @dragenter.prevent.stop="isDragover = true"
-        @dragleve.prevent.stop="isDragover = false"
+        @dragend.prevent.stop="is_dragover = false"
+        @dragover.prevent.stop="is_dragover = true"
+        @dragenter.prevent.stop="is_dragover = true"
+        @dragleve.prevent.stop="is_dragover = false"
         @drop.prevent.stop="upload($event)"
       >
         <h5>Drop your files here</h5>
       </div>
       <hr class="my-6" />
       <div class="mb-4" v-for="upload in uploads" :key="upload.name">
-        <div class="font-bold text-sm" :class="upload.textClass">
+        <div class="font-bold text-sm" :class="upload.text_class">
           <i :class="upload.icon"></i> {{ upload.name }}
         </div>
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
           <div
             class="transition-all progress-bar"
             :class="upload.variant"
-            :style="{ width: upload.currentProgress + '%' }"
+            :style="{ width: upload.current_progress + '%' }"
           ></div>
         </div>
       </div>
@@ -50,20 +50,21 @@
 </template>
 
 <script>
-import { ref, uploadBytesResumable } from 'firebase/storage';
-import { storage } from '@/includes/firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { addDoc } from 'firebase/firestore';
+import { storage, auth, songsCollection } from '@/includes/firebase';
 
 export default {
   name: 'Upload',
   data() {
     return {
-      isDragover: false,
+      is_dragover: false,
       uploads: [],
     };
   },
   methods: {
     upload($event) {
-      this.isDragover = false;
+      this.is_dragover = false;
 
       const files = [...$event.dataTransfer.files];
 
@@ -77,29 +78,42 @@ export default {
         // prettier-ignore
         const uploadIndex = this.uploads.push({
           task,
-          currentProgress: 0,
+          current_progress: 0,
           name: file.name,
           variant: 'bg-blue-400',
           icon: 'fas fa-spinner fa-spin',
-          textClass: '',
+          text_class: '',
         }) - 1;
 
         task.on(
           'state_changed',
           (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            this.uploads[uploadIndex].currentProgress = progress;
+            this.uploads[uploadIndex].current_progress = progress;
           },
           (error) => {
             this.uploads[uploadIndex].variant = 'bg-red-400';
             this.uploads[uploadIndex].icon = 'fas fa-times';
-            this.uploads[uploadIndex].textClass = 'text-red-400';
+            this.uploads[uploadIndex].text_class = 'text-red-400';
             console.log(error);
           },
-          () => {
+          async () => {
+            const song = {
+              uid: auth.currentUser.uid,
+              display_name: auth.currentUser.displayName,
+              original_name: task.snapshot.ref.name,
+              modified_name: task.snapshot.ref.name,
+              genre: '',
+              comment_count: 0,
+            };
+
+            song.url = await getDownloadURL(task.snapshot.ref);
+
+            await addDoc(songsCollection, song);
+
             this.uploads[uploadIndex].variant = 'bg-green-400';
             this.uploads[uploadIndex].icon = 'fas fa-check';
-            this.uploads[uploadIndex].textClass = 'text-green-400';
+            this.uploads[uploadIndex].text_class = 'text-green-400';
           },
         );
       });
