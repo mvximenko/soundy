@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
+import Song from '../views/Song.vue';
 import store from '@/store';
 
 const routes = [
@@ -28,6 +29,11 @@ const routes = [
     redirect: { name: 'Manage' },
   },
   {
+    name: 'Song',
+    path: '/song/:id',
+    component: Song,
+  },
+  {
     path: '/:catchAll(.*)*',
     redirect: { name: 'Home' },
   },
@@ -40,7 +46,9 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (!to.matched.some((record) => record.meta.requiresAuth) || store.state.userLoggedIn) {
+  if (
+    !to.matched.some((record) => record.meta.requiresAuth) || store.state.userLoggedIn
+  ) {
     next();
   } else {
     next({ name: 'Home' });
