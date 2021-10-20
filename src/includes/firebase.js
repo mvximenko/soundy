@@ -18,3 +18,4 @@ export const db = getFirestore();
 export const storage = getStorage();
 
 export const songsCollection = collection(db, 'songs');
+export const commentsCollection = collection(db, 'comments');
