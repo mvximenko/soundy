@@ -6,12 +6,15 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { Howl } from 'howler';
 import { auth, db } from '@/includes/firebase';
 
 export default createStore({
   state: {
     authModalShow: false,
     userLoggedIn: false,
+    currentSong: {},
+    sound: {},
   },
   mutations: {
     toggleAuthModal: (state) => {
@@ -19,6 +22,14 @@ export default createStore({
     },
     toggleAuth(state) {
       state.userLoggedIn = !state.userLoggedIn;
+    },
+    newSong(state, payload) {
+      state.currentSong = payload;
+      state.sound = new Howl({
+        src: [payload.url],
+        html5: true,
+
+      });
     },
   },
   actions: {
@@ -62,6 +73,11 @@ export default createStore({
       if (payload.route.meta.requiresAuth) {
         payload.router.push({ name: 'Home' });
       }
+    },
+    async newSong({ commit, state }, payload) {
+      commit('newSong', payload);
+
+      state.sound.play();
     },
   },
 });
