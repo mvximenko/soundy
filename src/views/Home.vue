@@ -24,9 +24,15 @@
 
     <section class="container mx-auto">
       <div class="bg-white rounded border border-gray-200 relative flex flex-col">
-        <div class="px-6 pt-6 pb-5 font-bold border-b border-gray-200">
+        <!-- <div
+          class="px-6 pt-6 pb-5 font-bold border-b border-gray-200"
+          v-icon.right="'headphones-alt'"
+        > -->
+        <div
+          class="px-6 pt-6 pb-5 font-bold border-b border-gray-200"
+          v-icon-secondary="{ icon: 'headphones-alt', right: true }"
+        >
           <span class="card-title">Songs</span>
-          <i class="fa fa-headphones-alt float-right text-green-400 text-2xl"></i>
         </div>
 
         <ol id="playlist">
@@ -41,11 +47,15 @@
 import { getDocs } from 'firebase/firestore';
 import { songsCollection } from '@/includes/firebase';
 import AppSongItem from '../components/SongItem.vue';
+import IconSecondary from '@/directives/icon-secondary';
 
 export default {
   name: 'Home',
   components: {
     AppSongItem,
+  },
+  directives: {
+    'icon-secondary': IconSecondary,
   },
   data() {
     return {
