@@ -1,0 +1,15 @@
+{
+  "home": {
+    "listen": "Listen to Great Music!"
+  },
+  "manage": {
+    "my_songs": "My Songs"
+  },
+  "register": {
+    "TOS": "Terms of Service",
+    "accept": "I accept Soundy's {0}"
+  },
+  "song": {
+    "comment_count": "No comments | 1 Comment | {count} Comments"
+  }
+}
