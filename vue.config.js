@@ -10,4 +10,11 @@ module.exports = {
       fullInstall: true,
     },
   },
+  pwa: {
+    name: 'Soundy App',
+    themeColor: '#ff5e3a',
+    manifestOptions: {
+      short_name: 'Soundy',
+    },
+  },
 };

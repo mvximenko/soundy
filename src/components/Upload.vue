@@ -17,9 +17,7 @@
           text-gray-400
           transition
           duration-500
-          hover:text-white
-          hover:bg-green-400
-          hover:border-green-400 hover:border-solid
+          hover:text-white hover:bg-green-400 hover:border-green-400 hover:border-solid
         "
         :class="{ 'bg-green-400 border-green-400 border-solid': is_dragover }"
         @drag.prevent.stop=""
@@ -73,6 +71,19 @@ export default {
         if (file.type !== 'audio/mpeg') {
           return;
         }
+
+        if (!navigator.onLine) {
+          this.uploads.push({
+            task: {},
+            current_progress: 100,
+            name: file.name,
+            variant: 'bg-red-400',
+            icon: 'fas fa-times',
+            text_class: 'text-red-400',
+          });
+          return;
+        }
+
         const songsRef = ref(storage, `songs/${file.name}`);
         const task = uploadBytesResumable(songsRef, file);
 
