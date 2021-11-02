@@ -148,20 +148,24 @@ export default {
       });
     },
   },
-  async created() {
-    const docSnapshot = await getDoc(doc(songsCollection, this.$route.params.id));
+  async beforeRouteEnter(to, from, next) {
+    const docSnapshot = await getDoc(doc(songsCollection, to.params.id));
 
-    if (!docSnapshot.exists) {
-      this.$router.push({ name: 'Home' });
-      return;
-    }
+    next((vm) => {
+      if (!docSnapshot.exists) {
+        vm.$router.push({ name: 'Home' });
+        return;
+      }
 
-    const { sort } = this.$route.query;
+      const { sort } = vm.$route.query;
 
-    this.sort = sort === '1' || sort === '2' ? sort : '1';
+      // eslint-disable-next-line no-param-reassign
+      vm.sort = sort === '1' || sort === '2' ? sort : '1';
 
-    this.song = docSnapshot.data();
-    this.getComments();
+      // eslint-disable-next-line no-param-reassign
+      vm.song = docSnapshot.data();
+      vm.getComments();
+    });
   },
   methods: {
     ...mapActions(['newSong']),
