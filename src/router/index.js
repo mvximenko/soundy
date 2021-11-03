@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
-import Song from '../views/Song.vue';
 import store from '@/store';
+
+const Home = () => import(/* webpackChunkName: "home" */'@/views/Home.vue');
+const Manage = () => import(/* webpackChunkName: "groupedChunk" */'@/views/Manage.vue');
+const Song = () => import(/* webpackChunkName: "groupedChunk" */'@/views/Song.vue');
+const About = () => import(/* webpackChunkName: "about" */'@/views/About.vue');
 
 const routes = [
   {
@@ -12,7 +15,7 @@ const routes = [
   {
     path: '/about',
     name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
+    component: About,
   },
   {
     // alias: '/manage',
@@ -21,7 +24,7 @@ const routes = [
     meta: {
       requiresAuth: true,
     },
-    component: () => import(/* webpackChunkName: "manage" */ '../views/Manage.vue'),
+    component: Manage,
   },
   // keep route for search engines
   {
