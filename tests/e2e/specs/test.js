@@ -1,8 +1,8 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-describe('My First Test', () => {
+describe('Sanity Test', () => {
   it('Visits the app root url', () => {
     cy.visit('/');
-    cy.contains('h1', 'Welcome to Your Vue.js App');
+    cy.contains('h1', 'Listen to Great Music!');
   });
 });
